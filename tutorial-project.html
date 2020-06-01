@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Graphics and statistics for cardiology: comparing categorical and continuous variables</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Meng-ting Chen, Shih-hsin Liang" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="zh-CN.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Graphics and statistics for cardiology: comparing categorical and continuous variables
+### Meng-ting Chen, Shih-hsin Liang
+### 01 六月, 2020
+
+---
+
+## Outline
+
+--
+####- Introduction
+####- Graphs for display of single variable
+####- Graphs comparing two variables
+####- Graphs illustrating more than two variables
+
+
+---
+## Introduction
+####- describe appropriate use of graphs.
+####- recommend particular types of graph.
+####- describe why they are good choices
+####- All the examples are drawn from NHANES 2003–2004 and 2005–2006 datasets and 「金錢誘因、動機與教師研究生產力」
+####    -「金錢誘因、動機與教師研究生產力」來源為「學術調查研究資料庫」(Survey Research Data Archive)，由國立臺灣大學教務處師資培育中心為探討金錢誘因與教師研究表現之間的關係，以我國9所大學493位專任教師為對象，蒐集人口變項、動機和長期研究生產力資料。
+
+---
+## Graphs for display of a continuous variable
+
+
+---
+## Dot chart (n=30) 
+
+```r
+nhanessmall &lt;- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhanessmall.csv", na=".")
+with(nhanessmall, stripchart(BPXSAR, vertical=FALSE, pch=1, xlab="Systolic BP (mmHg)"))
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+---
+## Stacked dot chart  (n=30)
+
+```r
+library("beeswarm")
+with(nhanessmall, beeswarm(BPXSAR, breaks=NA, vertical=FALSE, pch=1, method="center", xlab="Systolic BP (mmHg)"))
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+
+---
+## Dot chart (n=200)
+
+
+```r
+nhanesmedium &lt;- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhanesmedium.csv", na=".")
+with(nhanesmedium, stripchart(BPXSAR, vertical=FALSE, pch=1, xlab="Systolic BP (mmHg)"))#, cex=1))
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+---
+## Stacked dot chart(n=200)
+
+
+```r
+library("beeswarm")
+with(nhanesmedium, beeswarm(BPXSAR, breaks=NA, vertical=FALSE, pch=1, method="center", xlab="Systolic BP (mmHg)"))
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+---
+##  Stacked dot chart with binned outcomes(n=200)
+ 
+
+```r
+with(nhanesmedium, beeswarm(BPXSAR, breaks=seq(min(BPXSAR), max(BPXSAR), 1), vertical=FALSE, pch=1, method="center", xlab="Systolic BP (mmHg)"))
+points(x=mean(nhanesmedium$BPXSAR), y=0.6, pch=16, col="blue")
+lines(x=confint(lm(BPXSAR~1, data=nhanesmedium)), y=c(0.6,0.6), pch=16, col="blue")
+legend("topright", col="blue",pch=16, lty=1, "Sample mean &amp; 95% conf interval", bty="n")
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+
+
+
+---
+## Violin plot(n=1000)
+
+
+```r
+nhaneslarge &lt;- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhaneslarge.csv", na=".")
+library("sm")
+library("vioplot")
+vioplot(nhaneslarge$BPXSAR, h=3, names="", horizontal=TRUE, col="grey90", drawRect=FALSE)
+mtext(side=1, line=3, "Systolic BP (mmHg)")
+points(x=mean(nhaneslarge$BPXSAR), y=1, pch=16, col="blue")
+points(x=median(nhaneslarge$BPXSAR), y=1, pch=18, col="red")
+legend("topright", pch=c(16,18), col=c("blue","red"), c("Sample mean","Sample median"), bty="n")
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+
+---
+## Histogram (n=1000)
+
+
+```r
+with(nhaneslarge, hist(BPXSAR, n=30, col="grey", main="", xlab="Systolic BP (mmHg)"))
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+
+---
+## 大學專任教師每周平均研究時數
+
+
+
+
+```r
+ggplot(dta1, aes(a5_2_1,b7)) +geom_boxplot(col='gray') +geom_point() +labs(x='每周平均研究時數', y='是否贊成彈性薪資')+theme_bw()
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+
+---
+## 大學專任教師每周平均教學時數
+
+```r
+boxplot(dta1$a5_1_1 ~ dta1$b7,horizontal=T, varwidth=T,cex.axis=.6,xlab='教師每周平均教學時數',ylab="是否贊成彈性薪資型")
+stripchart(dta1$a5_1_1~dta1$b7, add=T,col='gray', pch=1, method='jitter')
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+
+
+
+
+
+
+
+---
+## Graphs for display of categorical variables
+
+---
+## Bar chart
+
+
+```r
+nhaneslarge &lt;- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhaneslarge.csv", na=".")
+barplot(as.matrix(table(nhaneslarge$BPXSAR&gt;140)/1000), beside=FALSE, horiz=TRUE, xlim=c(0,1),
+xlab="Proportion with Systolic BP &lt;= 140 mmHg\n")
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+
+---
+## Dot chart of proportion
+
+
+```r
+dotchart( 1-mean( nhaneslarge$BPXSAR&gt;140), xlim=c(0.03,0.97), lcolor=NA,  
+xlab="Proportion with Systolic BP &lt;= 140 mmHg,\nwith corresponding 95% conf interval", pch=1)
+lines(x = 1-binom.test( sum(nhaneslarge$BPXSAR&gt;140), 1000)$conf.int, y=c(1,1))
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+---
+## Stacked bar chart
+
+```r
+par(mar=c(4,2,4,0.3)+0.3, xpd=TRUE)
+barplot(as.matrix(table(nhaneslarge$race_ethc)/1000), beside=FALSE, horiz=TRUE, xlim=c(0,1),
+xlab="Proportion\n")
+legend("top", inset=c(0, -0.5), fill=gray.colors(4), horiz=TRUE, bty="n", levels(nhaneslarge$race_ethc))
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+---
+## Dot chart of proportions
+
+```r
+par(mar=c(5,2,0,0.3)+0.3)
+dotchart( as.matrix(rev(table(nhaneslarge$race_ethc)))/1000, 
+xlim=c(0.03,0.97), lcolor=NA, gcolor="white", xlab="Proportion,\nwith corresponding 95% conf interval")
+for(i in 1:4){
+lines(x = binom.test( sum(as.numeric(nhaneslarge$race_ethc)==i), 1000)$conf.int,
+  y=5-c(i,i))}
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+---
+## 大學教師喜歡的獎勵方式(proportion)
+
+
+
+
+```r
+dotchart(prop.table(table(dta3)))
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+---
+## Graphs comparing two variables
+###  Continuous versus categorical
+
+---
+## Multiple dot chart 
+
+```r
+nhanessmall &lt;- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhanessmall.csv", na=".")
+nhanesmedium &lt;- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhanesmedium.csv", na=".")
+nhaneslarge &lt;- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhaneslarge.csv", na=".")
+boxplot(DR1TFOLA ~gender, ylim=c(0,2200), type="n", border=0,
+     data=nhanessmall,xlab="",ylab=quote("Folate intake"~(mu*g/day)) )
+library("beeswarm")
+beeswarm(DR1TFOLA ~gender, 
+ data=nhanessmall,method="center", breaks=NA, add=TRUE)
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+
+---
+## Multiple binned stacked dot chart 
+
+```r
+boxplot(DR1TFOLA ~gender, ylim=c(0,2200), type="n", border=0,
+     data=nhanesmedium,xlab="",ylab=quote("Folate intake"~(mu*g/day)) )
+beeswarm(DR1TFOLA ~gender, data=nhanesmedium,method="center", add=TRUE)
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+
+---
+## multiple violin plot 
+
+```r
+library("sm")
+library("vioplot")
+vioplot( subset(nhaneslarge, gender=="Male")$DR1TFOLA, 
+         subset(nhaneslarge, gender=="Female")$DR1TFOLA, 
+         h=20, ylim=c(0,2200), names=c("Male","Female"), col="grey90", drawRect=FALSE)
+mtext(side=2, line=3, cex=0.75, quote("Folate intake"~(mu*g/day)))
+segments(.8,400,1.2,400,lwd=2,lty=2,col="grey30")
+segments(1.8,400,2.2,400,lwd=2,lty=2,col="grey30")
+segments(1.8,600,2.2,600,lwd=2,lty=1,col="grey30")
+legend("topright",legend=c("RDA: pregnant women", "RDA: other adults"),lty=1:2,lwd=2,bty="n",col="grey30")
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+---
+#### 大學教師對金錢獎勵的態度與每周教學時間關係
+
+
+
+
+```r
+ggplot(dta2, aes(b10_3, a5_1_1)) +geom_linerange(aes(x = b10_3, ymin = 0, ymax =a5_1_1), color = "lightgray", size = 1.5)+geom_point(aes(color = b10_3,position="jitter"), size = 2)+ggpubr::color_palette("jco")+labs(x="對金錢獎勵的態度", y="每周研究時數")+theme(legend.position = "none")+scale_colour_discrete("對金錢獎勵的態度")+theme_pubclean()
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+
+
+---
+#### 大學教師對金錢獎勵的態度與每周研究時間關係
+
+```r
+pd &lt;- position_dodge(.3)
+p &lt;- dta2 %&gt;% group_by(b10_3) %&gt;%summarize(m_h=mean(a5_2_1),se_h=sd(a5_2_1)/sqrt(n())) %&gt;% ggplot() + aes(b10_3,m_h,group = 1 ) +geom_errorbar(aes(ymin=m_h - se_h,ymax=m_h + se_h),width=.2, size=.3, position=pd) +geom_line(position=pd, linetype='dotted') +geom_point(position=pd, 
+size=rel(3)) +scale_shape(guide=guide_legend(title=NULL)) +labs(x="對金錢獎勵的方式的態度", y="每周研究時數") +theme_ipsum() +theme(legend.position=c(.9, .8))
+p
+```
+
+![](tutorial-project_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
