@@ -1,0 +1,263 @@
+---
+title: "Graphics and statistics for cardiology: comparing categorical and continuous variables"
+author: "Meng-ting Chen, Shih-hsin Liang"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  xaringan::moon_reader:
+    css: [default, zh-CN.css]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+## Outline
+
+--
+####- Introduction
+####- Graphs for display of single variable
+####- Graphs comparing two variables
+####- Graphs illustrating more than two variables
+
+
+---
+## Introduction
+####- describe appropriate use of graphs.
+####- recommend particular types of graph.
+####- describe why they are good choices
+####- All the examples are drawn from NHANES 2003–2004 and 2005–2006 datasets and 「金錢誘因、動機與教師研究生產力」
+####    -「金錢誘因、動機與教師研究生產力」來源為「學術調查研究資料庫」(Survey Research Data Archive)，由國立臺灣大學教務處師資培育中心為探討金錢誘因與教師研究表現之間的關係，以我國9所大學493位專任教師為對象，蒐集人口變項、動機和長期研究生產力資料。
+
+---
+## Graphs for display of a continuous variable
+
+
+---
+## Dot chart (n=30) 
+```{r fig.height=3}
+nhanessmall <- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhanessmall.csv", na=".")
+with(nhanessmall, stripchart(BPXSAR, vertical=FALSE, pch=1, xlab="Systolic BP (mmHg)"))
+
+```
+---
+## Stacked dot chart  (n=30)
+```{r fig.height=3}
+library("beeswarm")
+with(nhanessmall, beeswarm(BPXSAR, breaks=NA, vertical=FALSE, pch=1, method="center", xlab="Systolic BP (mmHg)"))
+```
+
+---
+## Dot chart (n=200)
+
+```{r fig.height=3}
+nhanesmedium <- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhanesmedium.csv", na=".")
+with(nhanesmedium, stripchart(BPXSAR, vertical=FALSE, pch=1, xlab="Systolic BP (mmHg)"))#, cex=1))
+
+```
+
+---
+## Stacked dot chart(n=200)
+
+```{r fig.height=3}
+library("beeswarm")
+with(nhanesmedium, beeswarm(BPXSAR, breaks=NA, vertical=FALSE, pch=1, method="center", xlab="Systolic BP (mmHg)"))
+```
+
+---
+##  Stacked dot chart with binned outcomes(n=200)
+ 
+```{r fig.height=3 }
+with(nhanesmedium, beeswarm(BPXSAR, breaks=seq(min(BPXSAR), max(BPXSAR), 1), vertical=FALSE, pch=1, method="center", xlab="Systolic BP (mmHg)"))
+points(x=mean(nhanesmedium$BPXSAR), y=0.6, pch=16, col="blue")
+lines(x=confint(lm(BPXSAR~1, data=nhanesmedium)), y=c(0.6,0.6), pch=16, col="blue")
+legend("topright", col="blue",pch=16, lty=1, "Sample mean & 95% conf interval", bty="n")
+```
+
+
+
+
+---
+## Violin plot(n=1000)
+
+```{r message=FALSE, fig.height=3 }
+nhaneslarge <- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhaneslarge.csv", na=".")
+library("sm")
+library("vioplot")
+vioplot(nhaneslarge$BPXSAR, h=3, names="", horizontal=TRUE, col="grey90", drawRect=FALSE)
+mtext(side=1, line=3, "Systolic BP (mmHg)")
+points(x=mean(nhaneslarge$BPXSAR), y=1, pch=16, col="blue")
+points(x=median(nhaneslarge$BPXSAR), y=1, pch=18, col="red")
+legend("topright", pch=c(16,18), col=c("blue","red"), c("Sample mean","Sample median"), bty="n")
+```
+
+---
+## Histogram (n=1000)
+
+```{r fig.height=3 }
+with(nhaneslarge, hist(BPXSAR, n=30, col="grey", main="", xlab="Systolic BP (mmHg)"))
+```
+
+
+---
+## 大學專任教師每周平均研究時數
+```{r include = FALSE }
+library(foreign) 
+library(ggplot2)
+library(beeswarm)
+library(dplyr)
+dta <- read.spss("C:/Users/5A88/Desktop/tutorial/data.sav",header=T)
+knitr::kable(head(dta))
+dta <- na.omit(dta)
+class(dta)
+dta$a1 <- factor(dta$a1, 
+                    levels(dta$a1)[c(1,2,3)])
+levels(dta$a1)[1:3] <- c('教學型','綜合型','研究型')
+dta$b7 <- factor(dta$b7,levels(dta$b7)[c(1,2)])
+levels(dta$a1)[1:2] <- c('贊成','反對')
+dta$a5_1_1 <- as.numeric(as.character(dta$a5_1_1))
+dta$a5_2_1 <- as.numeric(as.character(dta$a5_2_1))
+dta1 <- data.frame(as.data.frame(dta[c("id","a1","b7", "a5_1_1", "a5_2_1")]))
+dta1 <- na.omit(dta1)
+```
+
+
+```{r warning=FALSE,fig.height=5}
+ggplot(dta1, aes(a5_2_1,b7)) +geom_boxplot(col='gray') +geom_point() +labs(x='每周平均研究時數', y='是否贊成彈性薪資')+theme_bw()
+```
+
+---
+## 大學專任教師每周平均教學時數
+```{r warning=FALSE,fig.height=5}
+boxplot(dta1$a5_1_1 ~ dta1$b7,horizontal=T, varwidth=T,cex.axis=.6,xlab='教師每周平均教學時數',ylab="是否贊成彈性薪資型")
+stripchart(dta1$a5_1_1~dta1$b7, add=T,col='gray', pch=1, method='jitter')
+```
+
+
+
+
+
+
+
+---
+## Graphs for display of categorical variables
+
+---
+## Bar chart
+
+```{r fig.height=3 }
+nhaneslarge <- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhaneslarge.csv", na=".")
+barplot(as.matrix(table(nhaneslarge$BPXSAR>140)/1000), beside=FALSE, horiz=TRUE, xlim=c(0,1),
+xlab="Proportion with Systolic BP <= 140 mmHg\n")
+
+```
+
+---
+## Dot chart of proportion
+
+```{r fig.height=3 }
+dotchart( 1-mean( nhaneslarge$BPXSAR>140), xlim=c(0.03,0.97), lcolor=NA,  
+xlab="Proportion with Systolic BP <= 140 mmHg,\nwith corresponding 95% conf interval", pch=1)
+lines(x = 1-binom.test( sum(nhaneslarge$BPXSAR>140), 1000)$conf.int, y=c(1,1))
+
+```
+---
+## Stacked bar chart
+```{r fig.height=3 }
+par(mar=c(4,2,4,0.3)+0.3, xpd=TRUE)
+barplot(as.matrix(table(nhaneslarge$race_ethc)/1000), beside=FALSE, horiz=TRUE, xlim=c(0,1),
+xlab="Proportion\n")
+legend("top", inset=c(0, -0.5), fill=gray.colors(4), horiz=TRUE, bty="n", levels(nhaneslarge$race_ethc))
+```
+
+---
+## Dot chart of proportions
+```{r fig.height=5}
+par(mar=c(5,2,0,0.3)+0.3)
+dotchart( as.matrix(rev(table(nhaneslarge$race_ethc)))/1000, 
+xlim=c(0.03,0.97), lcolor=NA, gcolor="white", xlab="Proportion,\nwith corresponding 95% conf interval")
+for(i in 1:4){
+lines(x = binom.test( sum(as.numeric(nhaneslarge$race_ethc)==i), 1000)$conf.int,
+  y=5-c(i,i))}
+```
+---
+## 大學教師喜歡的獎勵方式(proportion)
+```{r include = FALSE}
+dta$b9_1 <- factor(dta$b9_1, 
+                    levels(dta$b9_1)[c(1,2,3,4)])
+levels(dta$b9_1)[1:4]<-c("發給獎金","頒發獎狀","減少授課時數","公開表揚")
+
+dta3 <-data.frame(as.data.frame(dta[c("b9_1")]))
+dta3 <- na.omit(dta3)
+```
+
+
+```{r warning=FALSE,fig.height=5}
+dotchart(prop.table(table(dta3)))
+```
+---
+## Graphs comparing two variables
+###  Continuous versus categorical
+
+---
+## Multiple dot chart 
+```{r fig.height=3}
+nhanessmall <- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhanessmall.csv", na=".")
+nhanesmedium <- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhanesmedium.csv", na=".")
+nhaneslarge <- read.csv("http://faculty.washington.edu/kenrice/heartgraphs/nhaneslarge.csv", na=".")
+boxplot(DR1TFOLA ~gender, ylim=c(0,2200), type="n", border=0,
+     data=nhanessmall,xlab="",ylab=quote("Folate intake"~(mu*g/day)) )
+library("beeswarm")
+beeswarm(DR1TFOLA ~gender, 
+ data=nhanessmall,method="center", breaks=NA, add=TRUE)
+```
+
+---
+## Multiple binned stacked dot chart 
+```{r fig.height=3}
+boxplot(DR1TFOLA ~gender, ylim=c(0,2200), type="n", border=0,
+     data=nhanesmedium,xlab="",ylab=quote("Folate intake"~(mu*g/day)) )
+beeswarm(DR1TFOLA ~gender, data=nhanesmedium,method="center", add=TRUE)
+```
+
+---
+## multiple violin plot 
+```{r fig.height=3 }
+library("sm")
+library("vioplot")
+vioplot( subset(nhaneslarge, gender=="Male")$DR1TFOLA, 
+         subset(nhaneslarge, gender=="Female")$DR1TFOLA, 
+         h=20, ylim=c(0,2200), names=c("Male","Female"), col="grey90", drawRect=FALSE)
+mtext(side=2, line=3, cex=0.75, quote("Folate intake"~(mu*g/day)))
+segments(.8,400,1.2,400,lwd=2,lty=2,col="grey30")
+segments(1.8,400,2.2,400,lwd=2,lty=2,col="grey30")
+segments(1.8,600,2.2,600,lwd=2,lty=1,col="grey30")
+legend("topright",legend=c("RDA: pregnant women", "RDA: other adults"),lty=1:2,lwd=2,bty="n",col="grey30")
+```
+---
+#### 大學教師對金錢獎勵的態度與每周教學時間關係
+```{r include=FALSE}
+library(hrbrthemes)
+library(dplyr)
+library(ggpubr)
+dta$b10_3 <- factor(dta$b10_3, 
+                    levels(dta$b10_3)[c(1,2,3,4,5)])
+levels(dta$b10_3)[1:5]<-c("非常不同意","不同意","沒意見","同意","非常同意")
+dta2 <- data.frame(as.data.frame(dta[c("id","b10_3","a5_1_1","a5_2_1")]))
+dta2 <- na.omit(dta2)
+```
+
+
+```{r warning=F,fig.height=5,message=F}
+ggplot(dta2, aes(b10_3, a5_1_1)) +geom_linerange(aes(x = b10_3, ymin = 0, ymax =a5_1_1), color = "lightgray", size = 1.5)+geom_point(aes(color = b10_3,position="jitter"), size = 2)+ggpubr::color_palette("jco")+labs(x="對金錢獎勵的態度", y="每周研究時數")+theme(legend.position = "none")+scale_colour_discrete("對金錢獎勵的態度")+theme_pubclean()
+```
+
+
+---
+#### 大學教師對金錢獎勵的態度與每周研究時間關係
+```{r warning=F,fig.height=5}
+pd <- position_dodge(.3)
+p <- dta2 %>% group_by(b10_3) %>%summarize(m_h=mean(a5_2_1),se_h=sd(a5_2_1)/sqrt(n())) %>% ggplot() + aes(b10_3,m_h,group = 1 ) +geom_errorbar(aes(ymin=m_h - se_h,ymax=m_h + se_h),width=.2, size=.3, position=pd) +geom_line(position=pd, linetype='dotted') +geom_point(position=pd, 
+size=rel(3)) +scale_shape(guide=guide_legend(title=NULL)) +labs(x="對金錢獎勵的方式的態度", y="每周研究時數") +theme_ipsum() +theme(legend.position=c(.9, .8))
+p
+```
+---
